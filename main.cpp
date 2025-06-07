@@ -13,6 +13,27 @@ void *hGTASA, *hGTAVC;
 uintptr_t pGTASA, pGTAVC;
 ISAUtils* sautils;
 
+/* Functions (Pointers) */
+void* (*FindPlayerPed)(int);
+
+/* Functions */
+void DoVibroBasedOnDamage(float dmg)
+{
+    aml->DoVibro( 20 );
+}
+
+/* Hooks */
+DECL_HOOKb(GenerateDamageEvent, void *pHitPed, void *pEntity, int WeaponType, int WeaponDamage, int PieceType, int dir)
+{
+    if(GenerateDamageEvent(pHitPed, pEntity, WeaponType, WeaponDamage, PieceType, dir))
+    {
+        void* focusPlayer = FindPlayerPed(-1);
+        if(pEntity == focusPlayer) DoVibroBasedOnDamage( WeaponDamage );
+        return true;
+    }
+    return false;
+}
+
 /* Main */
 extern "C" void OnAllModsLoaded()
 {
@@ -30,6 +51,15 @@ extern "C" void OnAllModsLoaded()
         
     }
 
+    /* Funcies */
+    if(hGTASA)
+    {
+        SET_TO(FindPlayerPed, aml->GetSym(hGTASA, "_Z13FindPlayerPedi"));
+    }
+
     /* Hookies */
-    
+    if(pGTASA)
+    {
+        HOOK(GenerateDamageEvent, aml->GetSym(hGTASA, "_ZN7CWeapon19GenerateDamageEventEP4CPedP7CEntity11eWeaponTypei14ePedPieceTypesi"));
+    }
 }

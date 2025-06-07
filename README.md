@@ -1,0 +1,1 @@
+This mod is adding haptic feedback (vibration) back to the game! :)
